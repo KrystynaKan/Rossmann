@@ -24,21 +24,14 @@ def get_data(number_of_pages):
 
         data = soup.find_all('a', {'class': 'tile-product__name'})
         price = soup.find_all('div', {'class': 'tile-product__price'})
-        print(data, type(data))
-        print(price, type(price))
 
         all_data.extend(data)
         all_prices.extend(price)
 
         sleep(5)
 
-    print(len(all_data))
-    print(len(all_prices))
-
     a = all_prices[0]
     all_prices = [i for i in all_prices if (i != a)]
-    print(len(all_data))
-    print(len(all_prices))
 
     df = pd.DataFrame([all_data, all_prices]).T
 
@@ -63,7 +56,6 @@ def split_data(all_data):
         size = re.findall(r'class="text-nowrap">(\d.*?)</span>', str(cream), re.DOTALL)
         if not size:
             size = 'EMPTY'
-        # print(i, size)
         i += 1
 
         links.extend(link)
@@ -79,11 +71,6 @@ def split_data(all_data):
             prices.append(str(price))
 
     # split company to brand and series
-    print(len(links))
-    print(len(companies))
-    print(len(descriptions))
-    print(len(prices))
-    print(len(sizes))
 
     brand = []
     series = []
@@ -112,6 +99,7 @@ def split_data(all_data):
     ingredients_list = []
 
     for i in df_all_data['link']:
+        print(f'Getting ingredients from LINK {i}')
         http_address = f'https://www.rossmann.pl{i}'
         response = requests.get(http_address)
         content = response.content.decode("utf-8")
@@ -134,4 +122,9 @@ def split_data(all_data):
     return df_all_data
 
 
+# DOWNLOAD DATA TO CSV FILE
+df_ross = get_data(6)
+df_ross = split_data(df_ross)
+
+df_ross.to_csv('full_serum_database.csv', index=False)
 
