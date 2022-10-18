@@ -7,6 +7,7 @@ import unicodedata
 from bs4 import BeautifulSoup
 import matplotlib.pyplot as plt
 
+
 ### THIS FUNCTION DOWNLOAD LIST OF PRODUSCTS WITH URL LINKS FROM ROSSMANN.PL SITE
 def get_data(number_of_pages):
     all_data = []
@@ -36,6 +37,7 @@ def get_data(number_of_pages):
     df = pd.DataFrame([all_data, all_prices]).T
 
     return df
+
 
 ### THIS FUNCTION SPLITS DATA FROM FUNCTION 'get_data' TO PROPER COLUMNS AND FORMATS
 ### AND ADDS LIST OF INGREDIENTS BY DOWNLOADING FROM SERUM SITES
@@ -95,36 +97,11 @@ def split_data(all_data):
                                 'price': prices,
                                 'info': descriptions})
 
-    # download list of ingredients from specific serum sites
-    ingredients_list = []
-
-    for i in df_all_data['link']:
-        print(f'Getting ingredients from LINK {i}')
-        http_address = f'https://www.rossmann.pl{i}'
-        response = requests.get(http_address)
-        content = response.content.decode("utf-8")
-        content = html.unescape(content)
-        content = unicodedata.normalize('NFKD', content)
-        soup = BeautifulSoup(content, 'html.parser')
-        sleep(1)
-
-        try:
-            soup.find('div', {"class": "collapse fade py-2 "}).find('span', {"class": "csC8F6D76"}).get_text()
-        except:
-            ingredients_list.append('BRAK SKŁADU - BŁĄD')
-        else:
-            ingredients = soup.find('div', {"class": "collapse fade py-2 "})\
-                              .find('span', {"class": "csC8F6D76"}).get_text()
-            ingredients_list.append(ingredients)
-
-    df_all_data['ingredients'] = pd.Series(ingredients_list)
-
     return df_all_data
-
 
 # DOWNLOAD DATA TO CSV FILE
 df_ross = get_data(6)
 df_ross = split_data(df_ross)
 
-df_ross.to_csv('full_serum_database.csv', index=False)
 
+df_ross.to_csv('full_serum_database.csv', index=False)
